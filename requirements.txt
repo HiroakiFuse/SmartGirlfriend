@@ -8,4 +8,4 @@ MarkupSafe==1.0
 Werkzeug==0.14.1
 gevent==1.3.7
 gevent-websocket==0.10.1
-flask_sslify==0.1.5
+Flask-Sockets==0.2.1

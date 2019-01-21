@@ -4,15 +4,19 @@ from flask import Flask, jsonify,make_response,request,render_template
 from gevent import pywsgi
 import gevent
 from geventwebsocket.handler import WebSocketHandler
+from flask_sockets import Sockets
 from time import sleep
 # __name__は現在のファイルのモジュール名
 app = Flask(__name__)
+sockets = Sockets(app)
+#context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+#context.load_cert_chain('cert.crt','server.pass.key')
 #reqの初期化
 req = ''
-aaa
+
 @app.route('/')
 def index():
-	return render_template('index.html')
+	return render_template('index1.html')
 @app.route('/shenron',methods=['POST'])
 def post():
 	global req
@@ -31,8 +35,8 @@ def post():
 		return make_response(jsonifyresult)
 	
 #websocket側
-@app.route('/shenron')
-def ws():
+@sockets.route('/shenron')
+def ws(ws):
 	global req
 	if request.environ.get('wsgi.websocket'):
 		print(request.environ.get('wsgi.websocket'))
@@ -40,10 +44,10 @@ def ws():
 		while True:
 			if req == '':
 				ws.send('default')
-				gevent.sleep(3)
+				gevent.sleep(0.1)
 			else:
 				ws.send(req)
-				gevent.sleep(3)
+				gevent.sleep(5)
 				req = ''
 	return ''
 		#return render_template('index.html')
@@ -54,7 +58,7 @@ def not_found(error):
 
 def main():
 	app.debug = True
-	server = pywsgi.WSGIServer(("0.0.0.0", 5000), app,handler_class=WebSocketHandler)
+	server = pywsgi.WSGIServer(("0.0.0.0",8000), app,handler_class=WebSocketHandler)
 	server.serve_forever()
 
 if __name__ == "__main__":
