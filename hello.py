@@ -9,7 +9,7 @@ from time import sleep
 app = Flask(__name__)
 #reqの初期化
 req = ''
-
+aaa
 @app.route('/')
 def index():
 	return render_template('index.html')
