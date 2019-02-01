@@ -5,51 +5,48 @@ from gevent import pywsgi
 import gevent
 from geventwebsocket.handler import WebSocketHandler
 from flask_sockets import Sockets
-from time import sleep
+from gevent.event import AsyncResult
+
+#event処理の設定
+massage = AsyncResult()
 # __name__は現在のファイルのモジュール名
 app = Flask(__name__)
 sockets = Sockets(app)
 #context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
 #context.load_cert_chain('cert.crt','server.pass.key')
 #reqの初期化
-req = ''
-
 @app.route('/')
 def index():
 	return render_template('index1.html')
 @app.route('/shenron',methods=['POST'])
 def post():
-	global req
 	req = request.json['queryResult']['parameters']['Target']
-	
 	#characterの分岐
 	if req == 'character':
 		custom = request.json['queryResult']['parameters']['Custom']
 		color = request.json['queryResult']['parameters']['Color']
-		cuscol = []
-		cuscol.append(custom)
-		cuscol.append(color)
-		result = {"fulfillmentText":','}
-		return make_response(jsonify(result))
+		cascol = req+','+custom+','+color
+		massage.set(cascol)
+		gevent.sleep(0)
+		result = jsonify({"fulfillmentText": req})
+		return make_response(result)
 	else:
-		return make_response(jsonifyresult)
-	
+		result = jsonify({"fulfillmentText": req})
+		return make_response(result)
 #websocket側
 @sockets.route('/shenron')
 def ws(ws):
-	global req
 	if request.environ.get('wsgi.websocket'):
-		print(request.environ.get('wsgi.websocket'))
 		ws = request.environ['wsgi.websocket']
 		while True:
-			if req == '':
-				ws.send('default')
-				gevent.sleep(0.1)
+			gevent.sleep(2)
+			ms=massage.get()
+			if ms is not None:
+				ws.send(ms)
+				massage.set()
 			else:
-				ws.send(req)
-				gevent.sleep(5)
-				req = ''
-	return ''
+				ws.send("deffault")
+		return ''
 		#return render_template('index.html')
 	# エラーハンドリングi
 @app.errorhandler(404)
@@ -61,5 +58,9 @@ def main():
 	server = pywsgi.WSGIServer(("0.0.0.0",8000), app,handler_class=WebSocketHandler)
 	server.serve_forever()
 
+gevent.joinall([
+	gevent.spawn(post),
+	gevent.spawn(ws),
+	])
 if __name__ == "__main__":
     main()

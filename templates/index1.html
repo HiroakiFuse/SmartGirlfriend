@@ -10,40 +10,25 @@
     <script src="{{ url_for('static', filename='Build/UnityLoader.js') }}"></script>
     <script src="{{ url_for('static', filename='TemplateData/UnityProgress.js') }}"></script>
     <script>
-    var gameInstance = UnityLoader.instantiate("gameContainer", "./static/Build/WebGL.json", { onProgress: UnityProgress });
+    var gameInstance = UnityLoader.instantiate("gameContainer", "./static/Build/webgl3.json", { onProgress: UnityProgress });
     </script>
+    <!--
     <script>
-    var port = 8000
-    var ws = new WebSocket("wss://damp-ocean-74040.herokuapp.com:" + "/shenron");
-    ws.onopen = function() {
-        ws.send('open');
+    var ws = new WebSocket("wss://smartgf.herokuapp.com/shenron");
+    ws.onopen = function(event) {
+        console.log(event);
     };
-    ws.onmessage = function(e) {
-        document.getElementById("text-field").innerHTML = e.data;
+    ws.onmessage = function(event) {
+        console.log(event);
     };
-    /*    function doReload() {
-
-            // reloadメソッドによりページをリロード
-            window.location.reload();
-        }
-
-        window.addEventListener('load', function() {
-
-            // ページ表示完了した5秒後にリロード
-            setTimeout(doReload, 5000);
-        });
-    */
+    ws.onclose = function(event) {
+        console.log(event);
+    };
     </script>
+-->
 </head>
 
 <body>
-    <center>
-        <h1 id="text-field"></h1>
-    </center>
     <div id="gameContainer" style="width:100%; height:100%"></div>
-    <!--
-    <script src="{{ url_for('static', filename='js/application.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/reconnecting-websocket.min.js') }}"></script>
-  -->
 </body>
 </html>
